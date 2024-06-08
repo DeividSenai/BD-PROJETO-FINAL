@@ -4,7 +4,7 @@ USE PASTELARIA2;
 CREATE TABLE clientes (	
 	id_cliente INT PRIMARY KEY AUTO_INCREMENT,
     nome_cliente VARCHAR(50) NOT NULL,
-    cpf VARCHAR(11) NOT NULL,
+    cpf VARCHAR(11) NOT NULL UNIQUE,
     data_nascimento DATE NOT NULL,
     telefone VARCHAR(11) NOT NULL,
     email VARCHAR(50) NOT NULL,
@@ -14,19 +14,20 @@ CREATE TABLE clientes (
 
 CREATE TABLE cargos (
 	id_cargo INT PRIMARY KEY AUTO_INCREMENT,
-    nome_cargo VARCHAR(20) NOT NULL,
+    	nome_cargo VARCHAR(20) NOT NULL,
 	salario FLOAT
     );
 
 CREATE TABLE funcionarios (	
 	id_funcionario INT PRIMARY KEY AUTO_INCREMENT,
     nome_funcionario VARCHAR(50) NOT NULL,
-    cpf VARCHAR(11) NOT NULL,
+    cpf VARCHAR(11) NOT NULL UNIQUE,
     data_nascimento DATE NOT NULL,
     telefone VARCHAR(11) NOT NULL,
     email VARCHAR(50) NOT NULL,
     endereco VARCHAR(100) NOT NULL,
-    cargo VARCHAR(20) NOT NULL
+    cargo INT NOT NULL,
+	FOREIGN KEY (cargo) REFERENCES cargos(id_cargo)
 );
 
 
@@ -52,13 +53,14 @@ CREATE TABLE produtos_recheios (
 	quantidade INT NOT NULL,
     
     FOREIGN KEY (id_produto) references produtos(id_produto),
-    FOREIGN KEY (id_recheio) references recheios(id_recheio)
+    FOREIGN KEY (id_recheio) references recheios(id_recheio),
+    PRIMARY KEY (id_produto, id_recheio)	
 );
 
 CREATE TABLE pagamentos (
 	id_pagamento INT PRIMARY KEY AUTO_INCREMENT,
-    forma VARCHAR(10) NOT NULL, 
-    descricao VARCHAR(50) NOT NULL
+    	forma VARCHAR(10) NOT NULL, 
+    	descricao VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE pedidos (
@@ -80,32 +82,33 @@ CREATE TABLE itens_pedidos (
     valor_unitario FLOAT NOT NULL, 
 
 	FOREIGN KEY (id_pedido) references pedidos(id_pedido),
-	FOREIGN KEY (id_produto) references produtos(id_produto)
+	FOREIGN KEY (id_produto) references produtos(id_produto),
+	PRIMARY KEY (id_pedido, id_produto)
 );
 
 
--- Insert into clientes
+-- Insert  clientes
 INSERT INTO clientes (nome_cliente, cpf, data_nascimento, telefone, email, endereco) 
 VALUES 
-('João Silva', '12345678901', '1994-05-15', '11987654321', 'joao.silva@example.com', 'Rua da Penha, 123'),
-('Maria Oliveira', '98765432109', '2006-10-20', '11901234567', 'maria.oliveira@example.com', 'Av. Champs Elyées, 456'),
-('Pedro Santos', '45678901234', '1989-07-05', '11976543210', 'pedro.santos@example.com', 'Rua Las Ramblas, 789');
+('João Silva', '12345678901', '1994-05-15', '11987654321', 'joao.silva@gmail.com', 'Rua da Penha, 123'),
+('Maria Oliveira', '98765432109', '2006-10-20', '11901234567', 'maria.oliveira@outlook.com', 'Av. Champs Elyées, 456'),
+('Pedro Santos', '45678901234', '1989-07-05', '11976543210', 'pedro.santos@hotmail.com', 'Rua Las Ramblas, 789');
 
--- Insert into cargos
+-- Insert  cargos
 INSERT INTO cargos (nome_cargo, salario)
 VALUES 
 ('Atendente', 1500.00),
 ('Cozinheiro', 2000.00),
 ('Gerente', 3000.00);
 
--- Insert into funcionarios
+-- Insert  funcionarios
 INSERT INTO funcionarios (nome_funcionario, cpf, data_nascimento, telefone, email, endereco, cargo) 
 VALUES 
-('Carlos Pereira', '23456789012', '1996-03-25', '11987654322', 'carlos.pereira@example.com', 'Rua X, 789', 'Atendente'),
-('Ana Souza', '34567890123', '1984-11-12', '11901234568', 'ana.souza@example.com', 'Av. Y, 456', 'Cozinheiro'),
-('Luiza Lima','56789012345', '1992-08-30', '11976543211', 'luiza.lima@example.com', 'Rua Z, 123', 'Gerente');
+('Carlos Pereira', '23456789012', '1996-03-25', '11987654322', 'carlos.pereira@outlook.com', 'Rua A, 789', '1'),
+('Ana Souza', '34567890123', '1984-11-12', '11901234568', 'ana.souza@gmail.com', 'Av. B, 456', '2'),
+('Luiza Lima','56789012345', '1992-08-30', '11976543211', 'luiza.lima@hotmail.com', 'Rua C, 123', '3');
 
--- Insert into produtos
+-- Insert  produtos
 INSERT INTO produtos (nome_produto, descricao, preco, categoria, tamanho,estoque) 
 VALUES 
 ('Pastel de Carne', 'Pastel recheado com carne moída', 3.50, 'Salgado', 'P',10),
@@ -153,7 +156,7 @@ VALUES
 ('Batata Frita', 'Porção de batatas fritas crocantes', 7.00, 'Acompanhamento', 'M',10),
 ('Batata Frita', 'Porção de batatas fritas crocantes', 9.00, 'Acompanhamento', 'G',10);
 
--- Insert into recheios
+-- Insert  recheios
 INSERT INTO recheios (nome_recheio, descricao)
 VALUES 
 ('Carne', 'Carne moída temperada'),
@@ -165,7 +168,7 @@ VALUES
 ('Banana com Canela', 'Banana com Canela'),
 ('Cogumelos', 'Cogumelos refogado');
 
--- Insert into produtos_recheios
+-- Insert  produtos_recheios
 INSERT INTO produtos_recheios (id_produto, id_recheio, quantidade) VALUES
 (1, 1, 100), 
 (2, 3, 120), 
@@ -173,14 +176,14 @@ INSERT INTO produtos_recheios (id_produto, id_recheio, quantidade) VALUES
 (5, 2, 50),
 (5, 3, 100);
 
--- Insert into pagamentos
+-- Insert  pagamentos
 INSERT INTO pagamentos (forma, descricao)
 VALUES 
 ('Dinheiro', 'Pagamento em dinheiro na entrega'),
 ('Cartão ', 'Pagamento com cartão de crédito ou débito'),
 ('Pix ', 'Pagamento via Pix na entrega');
 
--- Insert into pedidos
+-- Insert  pedidos
 INSERT INTO pedidos (id_cliente, datapedido, forma_pagamento, valor_total, sts)
 VALUES 
 (1, '2023-09-09 10:00:00', 1, 10.50, 'FINALIZADO'),
@@ -201,9 +204,8 @@ VALUES
 (2, '2024-06-05 17:30:00', 3, 7.00, 'PROCESSANDO'),
 (3, '2024-05-05 18:00:00', 1, 7.00, 'PROCESSANDO'),
 (1, '2024-03-05 18:30:00', 2, 5.00, 'PROCESSANDO'),
-(19, NOW(), 1, 10.00, 'PROCESSANDO');
 
--- Insert into itens_pedidos
+-- Insert  itens_pedidos
 INSERT INTO itens_pedidos (id_pedido, id_produto, quantidade, valor_unitario)
 VALUES 
 (1, 1, 2, 3.50),
