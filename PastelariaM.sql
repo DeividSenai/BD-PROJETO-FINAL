@@ -204,6 +204,7 @@ VALUES
 (2, '2024-06-05 17:30:00', 3, 7.00, 'PROCESSANDO'),
 (3, '2024-05-05 18:00:00', 1, 7.00, 'PROCESSANDO'),
 (1, '2024-03-05 18:30:00', 2, 5.00, 'PROCESSANDO'),
+(2, '2024-03-06 13:30:00', 2, 12.00, 'PROCESSANDO'),
 
 -- Insert  itens_pedidos
 INSERT INTO itens_pedidos (id_pedido, id_produto, quantidade, valor_unitario)
