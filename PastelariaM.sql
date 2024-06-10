@@ -314,3 +314,152 @@ GROUP BY id_produto
 ORDER BY QTD_Vendas DESC;
 
 
+#TRIGGER
+#1
+# data_modificação não existe
+DELIMITER //
+CREATE TRIGGER cliente_modificado
+BEFORE UPDATE ON clientes
+FOR EACH ROW
+BEGIN
+    SET NEW.data_modificacao = NOW();
+END //
+DELIMITER ;
+
+#2
+DELIMITER //
+CREATE TRIGGER atualizar_status_pedido
+AFTER INSERT ON itens_pedidos
+FOR EACH ROW
+BEGIN
+    DECLARE total_itens INT;
+    DECLARE itens_entregues INT;
+    
+    SELECT COUNT(*) INTO total_itens FROM itens_pedidos WHERE id_pedido = NEW.id_pedido;
+    SELECT COUNT(*) INTO itens_entregues FROM itens_pedidos WHERE id_pedido = NEW.id_pedido AND status_entrega = 'ENTREGUE';
+    
+    IF total_itens = itens_entregues THEN
+        UPDATE pedidos SET sts = 'FINALIZADO' WHERE id_pedido = NEW.id_pedido;
+    END IF;
+END //
+DELIMITER ;
+
+#3
+DELIMITER //
+CREATE TRIGGER impedir_exclusao_produto
+BEFORE DELETE ON produtos
+FOR EACH ROW
+BEGIN
+    DECLARE pedido_ativo INT;
+    
+    SELECT COUNT(*) INTO pedido_ativo
+    FROM itens_pedidos
+    WHERE id_produto = OLD.id_produto AND (SELECT sts FROM pedidos WHERE id_pedido = id_pedido) = 'PROCESSANDO';
+    
+    IF pedido_ativo > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Este produto está associado a pedidos ativos e não pode ser excluído.';
+    END IF;
+END //
+DELIMITER ;
+
+#4
+DELIMITER //
+CREATE TRIGGER atualizar_estoque_produto
+AFTER INSERT ON itens_pedidos
+FOR EACH ROW
+BEGIN
+    UPDATE produtos
+    SET estoque = estoque - NEW.quantidade
+    WHERE id_produto = NEW.id_produto;
+END //
+DELIMITER ;
+
+#5
+#tabela historico_funcionario não existe
+DELIMITER //
+CREATE TRIGGER registrar_adicao_funcionario
+AFTER INSERT ON funcionarios
+FOR EACH ROW
+BEGIN
+    INSERT INTO historico_funcionarios (acao, descricao, data)
+    VALUES ('Adição', CONCAT('Novo funcionário adicionado: ', NEW.nome_funcionario), NOW());
+END //
+DELIMITER ;
+
+
+#VIEW
+#1
+-- View para listar todos os pedidos de um cliente pelo seu ID:
+CREATE VIEW pedidos_cliente AS
+SELECT p.*, c.nome_cliente
+FROM pedidos p
+JOIN clientes c ON p.id_cliente = c.id_cliente;
+
+#2
+-- View para listar todos os produtos com seu respectivo estoque disponível:
+CREATE VIEW estoque_produtos AS
+SELECT id_produto, nome_produto, descricao, categoria, tamanho, estoque
+FROM produtos;
+
+#3
+-- View para listar todos os pedidos processados no mês atual:
+CREATE VIEW pedidos_mes AS
+SELECT *
+FROM pedidos
+WHERE MONTH(datapedido) = MONTH(CURRENT_DATE());
+
+#4
+-- View para listar todos os funcionários com seus respectivos cargos e salários:
+CREATE VIEW funcionarios_cargos AS
+SELECT f.*, c.nome_cargo, c.salario
+FROM funcionarios f
+JOIN cargos c ON f.cargo = c.nome_cargo;
+
+#5
+-- View para listar todos os pedidos que ainda estão em processamento:
+CREATE VIEW pedidos_em_processamento AS
+SELECT *
+FROM pedidos
+WHERE sts = 'PROCESSANDO';
+
+#6
+-- View para listar todos os produtos que têm bacon e/ou queijo em seu recheio: **igual a função acima
+CREATE VIEW produtos_com_bacon_queijo AS
+SELECT DISTINCT p.*
+FROM produtos p
+JOIN produtos_recheios pr ON p.id_produto = pr.id_produto
+JOIN recheios r ON pr.id_recheio = r.id_recheio
+WHERE r.nome_recheio IN ('Bacon', 'Queijo');
+
+#7
+-- View para listar todos os clientes que fizeram pedidos este ano:  **igual a função acima
+CREATE VIEW clientes_pedidos_ano AS
+SELECT DISTINCT c.*
+FROM clientes c
+JOIN pedidos p ON c.id_cliente = p.id_cliente
+WHERE YEAR(p.datapedido) = YEAR(CURRENT_DATE());
+
+#8
+-- View para listar todos os produtos do categoria Pasteis 'Salgado' com preços acima de $4:
+CREATE VIEW salgados_preco_alto AS
+SELECT *
+FROM produtos
+WHERE categoria = 'Salgado' AND preco > 4.00;
+
+#9
+-- View para listar todos os pedidos com seus respectivos clientes e forma de pagamento:
+CREATE VIEW pedidos_clientes_pagamentos AS
+SELECT p.*, c.nome_cliente, pg.forma
+FROM pedidos p
+JOIN clientes c ON p.id_cliente = c.id_cliente
+JOIN pagamentos pg ON p.forma_pagamento = pg.id_pagamento;
+
+#10
+-- View para listar todos os produtos vendidos em cada pedido, incluindo sua quantidade e valor unitário:  
+CREATE VIEW detalhes_pedido AS
+SELECT p.*, ip.quantidade, ip.valor_unitario
+FROM itens_pedidos ip
+JOIN produtos p ON ip.id_produto = p.id_produto;
+
+
