@@ -515,12 +515,15 @@ JOIN recheios r ON pr.id_recheio = r.id_recheio
 WHERE r.nome_recheio IN ('Bacon', 'Queijo');
 
 #7
--- View para listar todos os clientes que fizeram pedidos este ano:  **igual a função acima
-CREATE VIEW clientes_pedidos_ano AS
-SELECT DISTINCT c.*
-FROM clientes c
-JOIN pedidos p ON c.id_cliente = p.id_cliente
-WHERE YEAR(p.datapedido) = YEAR(CURRENT_DATE());
+-- View para listar todos os clientes que fizeram pagamentos com cartao
+CREATE OR REPLACE VIEW pedidos_clientes_pagamentos_cartao AS
+SELECT p.*, c.nome_cliente, pg.forma
+FROM pedidos p
+JOIN clientes c ON p.id_cliente = c.id_cliente
+JOIN pagamentos pg ON p.forma_pagamento = pg.id_pagamento
+WHERE pg.forma = 'Cartão'
+AND MONTH(p.datapedido) = MONTH(CURRENT_DATE())
+AND YEAR(p.datapedido) = YEAR(CURRENT_DATE());
 
 #8
 -- View para listar todos os produtos do categoria Pasteis 'Salgado' com preços acima de $4:
