@@ -314,6 +314,88 @@ GROUP BY id_produto
 ORDER BY QTD_Vendas DESC;
 
 
+#PROCEDURES
+
+#1
+DELIMITER //
+CREATE PROCEDURE ListarPedidosCliente(IN cliente_id INT)
+BEGIN
+    SELECT *
+    FROM pedidos
+    WHERE id_cliente = cliente_id;
+END //
+DELIMITER ;
+
+#2
+DELIMITER //
+CREATE PROCEDURE CalcularTotalPedidosMes(IN mes INT, IN ano INT)
+BEGIN
+    SELECT SUM(valor_total) AS total_valor_mes
+    FROM pedidos
+    WHERE MONTH(datapedido) = mes AND YEAR(datapedido) = ano;
+END //
+DELIMITER ;
+
+#3
+DELIMITER //
+CREATE PROCEDURE CadastrarProduto(IN nome_produto VARCHAR(30),IN descricao VARCHAR(100),IN preco FLOAT,IN categoria VARCHAR(25), tamanho CHAR(2),estoque INT)
+BEGIN
+    INSERT INTO produtos (nome_produto, descricao, preco, categoria, tamanho, estoque) VALUES (nome_produto, descricao, preco , categoria, tamanho,estoque);
+END //
+DELIMITER ;
+
+CALL ListarPedidosCliente(1);
+CALL CalcularTotalPedidosMes(6, 2024);
+CALL CadastrarProduto('Pastel de Misto', 'Delicioso pastel de queijo e presunto ', 5.50, 'Salgado', 'G', 25);
+
+
+#FUNÇÕES
+#1
+DELIMITER //
+CREATE FUNCTION CalcularIdade(data_nascimento DATE)
+RETURNS INT
+BEGIN
+    DECLARE idade INT;
+    SET idade = YEAR(CURRENT_DATE()) - YEAR(data_nascimento);
+    IF (MONTH(CURRENT_DATE()) < MONTH(data_nascimento) OR (MONTH(CURRENT_DATE()) = MONTH(data_nascimento) AND DAY(CURRENT_DATE()) < DAY(data_nascimento))) THEN
+        SET idade = idade - 1;
+    END IF;
+    RETURN idade;
+END //
+DELIMITER ;
+#2
+DELIMITER //
+CREATE FUNCTION MaiorIdade(cliente_id INT)
+RETURNS BOOLEAN
+BEGIN
+    DECLARE idade_cliente INT;
+    SELECT CalcularIdade(data_nascimento) INTO idade_cliente FROM clientes WHERE id_cliente = cliente_id;
+    IF idade_cliente >= 18 THEN
+        RETURN TRUE;
+    ELSE
+        RETURN FALSE;
+    END IF;
+END //
+DELIMITER ;
+#3
+DELIMITER //
+CREATE FUNCTION CalcularTotalValorPedido(pedido_id INT)
+RETURNS FLOAT
+BEGIN
+    DECLARE total FLOAT;
+    SELECT SUM(ip.quantidade * p.preco) INTO total
+    FROM itens_pedidos ip
+    JOIN produtos p ON ip.id_produto = p.id_produto
+    WHERE ip.id_pedido = pedido_id;
+    RETURN total;
+END //
+DELIMITER ;
+
+SELECT CalcularIdade('2001-11-16');
+SELECT MaiorIdade(2);
+SELECT CalcularTotalValorPedido(1);
+
+
 #TRIGGER
 #1
 # data_modificação não existe
