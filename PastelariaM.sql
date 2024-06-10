@@ -132,9 +132,9 @@ VALUES
 ('Pastel de Nutella', 'Pastel doce recheado com Nutella', 4.00, 'Doce', 'P',10),
 ('Pastel de Nutella', 'Pastel doce recheado com Nutella', 5.00, 'Doce', 'M',20),
 ('Pastel de Nutella', 'Pastel doce recheado com Nutella', 6.00, 'Doce', 'G',30),
-('Pastel de Banana com Canela', 'Pastel doce recheado com Nutella', 4.00, 'Doce', 'P',10),
-('Pastel de Banana com Canela', 'Pastel doce recheado com Nutella', 5.00, 'Doce', 'M',20),
-('Pastel de Banana com Canela', 'Pastel doce recheado com Nutella', 6.00, 'Doce', 'G',30),24
+('Pastel de Banana com Canela', 'Pastel doce recheado com Banana e Canela', 4.00, 'Doce', 'P',10),
+('Pastel de Banana com Canela', 'Pastel doce recheado com Banana e Canela', 5.00, 'Doce', 'M',20),
+('Pastel de Banana com Canela', 'Pastel doce recheado com Banana e Canela', 6.00, 'Doce', 'G',30),
 ('Coca-Cola', 'Refrigerante', 2.00, 'Bebida', 'P',10),
 ('Coca-Cola', 'Refrigerante', 3.00, 'Bebida', 'M',20),
 ('Coca-Cola', 'Refrigerante', 4.00, 'Bebida', 'G',30),
@@ -231,15 +231,15 @@ VALUES
 (12, 1, 2, 3.50),
 (12, 34, 3, 2.00),
 (13, 5, 2, 4.00),
-(13, 32, 1, 3.00);
+(13, 32, 1, 3.00),
 (14, 15, 2, 6.50),
 (15, 1, 2, 3.50),
 (15, 34, 3, 2.00),
 (16, 5, 2, 4.00),
 (16, 32, 1, 3.00),
 (17, 9, 3, 5.00),
-(17,27, 2, 4.00),
-(18, 13, 2, 4.50),-
+(17, 27, 2, 4.00),
+(18, 13, 2, 4.50),
 (18, 36, 1, 4.00),	
 (19, 1, 2, 3.50), 
 (19, 33, 1, 4.00); 
