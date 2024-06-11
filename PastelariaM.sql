@@ -86,6 +86,12 @@ CREATE TABLE itens_pedidos (
 	PRIMARY KEY (id_pedido, id_produto)
 );
 
+CREATE TABLE historico_funcionarios(
+    id_hf INT AUTO_INCREMENT PRIMARY KEY,
+    acao_funcionario VARCHAR(50),
+    descricao VARCHAR(50),
+    datamarcacao DATETIME);
+
 
 -- Insert  clientes
 INSERT INTO clientes (nome_cliente, cpf, data_nascimento, telefone, email, endereco) 
@@ -399,6 +405,7 @@ SELECT CalcularTotalValorPedido(1);
 #TRIGGER
 #1
 ALTER TABLE clientes ADD data_modificacao DATETIME;
+
 DELIMITER //
 CREATE TRIGGER cliente_modificado
 BEFORE UPDATE ON clientes
@@ -414,17 +421,17 @@ CREATE TRIGGER atualizar_status_pedido
 AFTER INSERT ON itens_pedidos
 FOR EACH ROW
 BEGIN
-    DECLARE total_itens INT;
-    DECLARE itens_entregues INT;
-    
-    SELECT COUNT(*) INTO total_itens FROM itens_pedidos WHERE id_pedido = NEW.id_pedido;
-    SELECT COUNT(*) INTO itens_entregues FROM itens_pedidos WHERE id_pedido = NEW.id_pedido AND status_entrega = 'ENTREGUE';
-    
-    IF total_itens = itens_entregues THEN
+    DECLARE total_itens_pedido INT;
+
+    SELECT COUNT(*) INTO total_itens_pedido FROM itens_pedidos WHERE id_pedido = NEW.id_pedido;
+
+    IF NEW.quantidade = total_itens_pedido THEN
         UPDATE pedidos SET sts = 'FINALIZADO' WHERE id_pedido = NEW.id_pedido;
     END IF;
 END //
 DELIMITER ;
+
+
 
 #3
 DELIMITER //
@@ -458,13 +465,13 @@ END //
 DELIMITER ;
 
 #5
-#tabela historico_funcionario não existe
+
 DELIMITER //
 CREATE TRIGGER registrar_adicao_funcionario
 AFTER INSERT ON funcionarios
 FOR EACH ROW
 BEGIN
-    INSERT INTO historico_funcionarios (acao, descricao, data)
+    INSERT INTO historico_funcionarios (acao_funcionario, descricao, datamarcacao)
     VALUES ('Adição', CONCAT('Novo funcionário adicionado: ', NEW.nome_funcionario), NOW());
 END //
 DELIMITER ;
@@ -546,4 +553,9 @@ SELECT p.*, ip.quantidade, ip.valor_unitario
 FROM itens_pedidos ip
 JOIN produtos p ON ip.id_produto = p.id_produto;
 
+#11
+-- View para listar todos os produtos com preço unitário e quantidade em estoque para controle de estoque:
+CREATE VIEW controle_estoque AS
+SELECT id_produto, nome_produto, preco AS preco_unitario, estoque
+FROM produtos;
 
