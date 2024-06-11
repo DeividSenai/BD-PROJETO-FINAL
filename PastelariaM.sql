@@ -204,7 +204,7 @@ VALUES
 (2, '2024-06-05 17:30:00', 3, 11.00, 'PROCESSANDO'),
 (3, '2024-05-05 18:00:00', 1, 23.00, 'PROCESSANDO'),
 (1, '2024-03-05 18:30:00', 2, 13.00, 'PROCESSANDO'),
-(2, '2024-03-06 13:30:00', 2, 11.00, 'PROCESSANDO'),
+(2, '2024-03-06 13:30:00', 2, 11.00, 'PROCESSANDO');
 
 -- Insert  itens_pedidos
 INSERT INTO itens_pedidos (id_pedido, id_produto, quantidade, valor_unitario)
@@ -398,7 +398,7 @@ SELECT CalcularTotalValorPedido(1);
 
 #TRIGGER
 #1
-# data_modificação não existe
+ALTER TABLE clientes ADD data_modificacao DATETIME;
 DELIMITER //
 CREATE TRIGGER cliente_modificado
 BEFORE UPDATE ON clientes
@@ -506,13 +506,12 @@ FROM pedidos
 WHERE sts = 'PROCESSANDO';
 
 #6
--- View para listar todos os produtos que têm bacon e/ou queijo em seu recheio: **igual a função acima
-CREATE VIEW produtos_com_bacon_queijo AS
-SELECT DISTINCT p.*
-FROM produtos p
-JOIN produtos_recheios pr ON p.id_produto = pr.id_produto
-JOIN recheios r ON pr.id_recheio = r.id_recheio
-WHERE r.nome_recheio IN ('Bacon', 'Queijo');
+-- View para listar todos os funcionarios e suas respectivas ações
+CREATE OR REPLACE VIEW funcionarios_contratados AS
+SELECT *
+FROM historico_funcionarios
+WHERE acao_funcionario = 'Adição'
+  AND YEAR(datamarcacao) = YEAR(CURRENT_DATE());
 
 #7
 -- View para listar todos os clientes que fizeram pagamentos com cartao
